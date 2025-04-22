@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.8.4",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",

@@ -1,6 +1,11 @@
+'use client'
+
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 export default function Sidebar() {
+  const pathname = usePathname();
+  
   const menuItems = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Quotes", href: "/quotes" },
@@ -18,15 +23,21 @@ export default function Sidebar() {
       </div>
       
       <nav>
-        {menuItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className="flex items-center py-2 px-3 mb-1 rounded hover:bg-slate-700 transition-colors"
-          >
-            {item.name}
-          </Link>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex items-center py-2 px-3 mb-1 rounded transition-colors ${
+                isActive ? 'bg-blue-600 text-white' : 'hover:bg-slate-700'
+              }`}
+            >
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

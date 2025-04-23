@@ -1,24 +1,20 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
-
-// Use uma fonte do Google Fonts em vez da Geist
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata = {
-  title: 'Techrino - Sistema de Orçamentos',
-  description: 'Sistema de gerenciamento de orçamentos Techrino',
-}
+// src/app/layout.tsx
+import './globals.css';
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
+    <html lang="en">
+      <head>
+        <title>Aplicativo de Cotações</title>
+        <meta name="description" content="Sistema para gerenciamento de cotações" />
+      </head>
+      <body>
         {children}
       </body>
     </html>
-  )
+  );
 }

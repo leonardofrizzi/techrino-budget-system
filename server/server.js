@@ -9,6 +9,9 @@ const app = express();
 // Middleware
 app.use(express.json());
 
+// Routes
+app.use('/api/clients', require('./routes/clientRoutes'));
+
 // Basic route
 app.get('/', (req, res) => {
   res.send('API is running');

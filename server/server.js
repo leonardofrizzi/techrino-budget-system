@@ -11,6 +11,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/clients', require('./routes/clientRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/quotes', require('./routes/quoteRoutes'));
 
 // Basic route
 app.get('/', (req, res) => {

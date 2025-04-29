@@ -9,10 +9,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Aplicativo de Cotações</title>
-        <meta name="description" content="Sistema para gerenciamento de cotações" />
+        <title>Techrino | Quote Management System</title>
+        <meta name="description" content="Quote Management System" />
       </head>
-      <body>
+      <body suppressHydrationWarning={true}>
         {children}
       </body>
     </html>

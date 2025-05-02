@@ -1,3 +1,4 @@
+// models/clientModel.js
 const mongoose = require('mongoose');
 
 const clientSchema = mongoose.Schema(
@@ -30,6 +31,15 @@ const clientSchema = mongoose.Schema(
   }
 );
 
-const Client = mongoose.model('Client', clientSchema);
+// Transform output: map _id to id and remove __v
+clientSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
 
+const Client = mongoose.model('Client', clientSchema);
 module.exports = Client;

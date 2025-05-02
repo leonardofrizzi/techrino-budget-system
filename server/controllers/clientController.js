@@ -1,3 +1,4 @@
+// controllers/clientController.js
 const Client = require('../models/clientModel');
 
 // @desc    Get all clients
@@ -6,7 +7,9 @@ const Client = require('../models/clientModel');
 const getClients = async (req, res) => {
   try {
     const clients = await Client.find({});
-    res.json(clients);
+    // transform via toJSON virtuals
+    const result = clients.map(c => c.toJSON());
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -19,7 +22,7 @@ const getClientById = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
     if (client) {
-      res.json(client);
+      res.json(client.toJSON());
     } else {
       res.status(404).json({ message: 'Client not found' });
     }
@@ -48,7 +51,7 @@ const createClient = async (req, res) => {
       status: status || 'active',
     });
 
-    res.status(201).json(client);
+    res.status(201).json(client.toJSON());
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -66,14 +69,14 @@ const updateClient = async (req, res) => {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    client.name = name || client.name;
-    client.company = company || client.company;
-    client.email = email || client.email;
-    client.phone = phone || client.phone;
-    client.status = status || client.status;
+    client.name = name !== undefined ? name : client.name;
+    client.company = company !== undefined ? company : client.company;
+    client.email = email !== undefined ? email : client.email;
+    client.phone = phone !== undefined ? phone : client.phone;
+    client.status = status !== undefined ? status : client.status;
 
     const updatedClient = await client.save();
-    res.json(updatedClient);
+    res.json(updatedClient.toJSON());
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -90,7 +93,7 @@ const deleteClient = async (req, res) => {
     }
 
     await client.deleteOne();
-    res.json({ message: 'Client removed' });
+    res.json({ message: 'Client removed', id: client.id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

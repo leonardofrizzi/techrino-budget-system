@@ -12,11 +12,11 @@ const api = axios.create({
 
 // Request interceptor for logging
 api.interceptors.request.use(
-  config => {
+  (config) => {
     console.log(`[Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
-  error => {
+  (error) => {
     console.error('[Request Error]', error);
     return Promise.reject(error);
   }
@@ -24,11 +24,11 @@ api.interceptors.request.use(
 
 // Response interceptor for logging
 api.interceptors.response.use(
-  response => {
+  (response) => {
     console.log(`[Response] Status: ${response.status} from ${response.config.url}`);
     return response;
   },
-  error => {
+  (error) => {
     if (error.response) {
       console.error(`[Response Error] Status: ${error.response.status}`, error.response.data);
     } else if (error.request) {
@@ -40,69 +40,40 @@ api.interceptors.response.use(
   }
 );
 
+/**
+ * Client service for CRUD operations.
+ * Assumes backend returns JSON with `id` field (via toJSON transform).
+ */
+
 const clientService = {
+  /** Fetch all clients */
   async getClients() {
-    try {
-      const response = await api.get('/clients');
-      console.log('Clients data received:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-      
-      // Specific check for CORS errors
-      if (error.message && error.message.includes('Network Error')) {
-        console.error('CORS issue detected. Make sure your backend has proper CORS headers.');
-        console.error('Try adding the following to your backend Express app:');
-        console.error(`
-          app.use(cors({
-            origin: 'http://localhost:3000', // Your frontend URL
-            credentials: true
-          }));
-        `);
-      }
-      
-      throw error;
-    }
+    const response = await api.get('/clients');
+    return response.data; // Array of clients with { id, name, company, email, phone, status }
   },
 
+  /** Fetch client by ID */
   async getClient(id) {
-    try {
-      const response = await api.get(`/clients/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching client ${id}:`, error);
-      throw error;
-    }
+    const response = await api.get(`/clients/${id}`);
+    return response.data;
   },
 
+  /** Create a new client */
   async createClient(clientData) {
-    try {
-      const response = await api.post('/clients', clientData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating client:', error);
-      throw error;
-    }
+    const response = await api.post('/clients', clientData);
+    return response.data;
   },
 
+  /** Update client by ID */
   async updateClient(id, clientData) {
-    try {
-      const response = await api.put(`/clients/${id}`, clientData);
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating client ${id}:`, error);
-      throw error;
-    }
+    const response = await api.put(`/clients/${id}`, clientData);
+    return response.data;
   },
 
+  /** Delete client by ID */
   async deleteClient(id) {
-    try {
-      const response = await api.delete(`/clients/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error deleting client ${id}:`, error);
-      throw error;
-    }
+    await api.delete(`/clients/${id}`);
+    return id;
   }
 };
 

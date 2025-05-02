@@ -1,3 +1,4 @@
+// routes/clientRoutes.js
 const express = require('express');
 const router = express.Router();
 const {
@@ -8,7 +9,16 @@ const {
   deleteClient,
 } = require('../controllers/clientController');
 
-router.route('/').get(getClients).post(createClient);
-router.route('/:id').get(getClientById).put(updateClient).delete(deleteClient);
+router
+  .route('/')
+  .get(getClients)
+  .post(createClient);
+
+router
+  .route('/:id')
+  .get(getClientById)
+  .put(updateClient)    
+  .patch(updateClient)  
+  .delete(deleteClient);
 
 module.exports = router;

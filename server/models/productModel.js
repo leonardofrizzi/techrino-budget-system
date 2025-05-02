@@ -1,3 +1,4 @@
+// models/productModel.js
 const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema(
@@ -6,29 +7,37 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    description: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
     category: {
       type: String,
       required: true,
     },
+    specifications: {
+      type: String,
+    },
+    preferredSuppliers: [String],
+    typicalMargin: {
+      type: Number,
+      default: 0,
+    },
     inStock: {
       type: Boolean,
       default: true,
-    }
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Product = mongoose.model('Product', productSchema);
+// Transform _id to id and remove __v
+productSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
 
+const Product = mongoose.model('Product', productSchema);
 module.exports = Product;

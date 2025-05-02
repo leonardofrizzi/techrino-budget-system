@@ -1,3 +1,4 @@
+// controllers/productController.js
 const Product = require('../models/productModel');
 
 // @desc    Get all products
@@ -6,7 +7,7 @@ const Product = require('../models/productModel');
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.json(products);
+    res.json(products.map(p => p.toJSON()));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -19,7 +20,7 @@ const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
-      res.json(product);
+      res.json(product.toJSON());
     } else {
       res.status(404).json({ message: 'Product not found' });
     }
@@ -33,59 +34,53 @@ const getProductById = async (req, res) => {
 // @access  Public
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, inStock } = req.body;
-
+    const { name, category, specifications, preferredSuppliers, typicalMargin, inStock } = req.body;
     const product = await Product.create({
       name,
-      description,
-      price,
       category,
+      specifications,
+      preferredSuppliers,
+      typicalMargin,
       inStock: inStock !== undefined ? inStock : true,
     });
-
-    res.status(201).json(product);
+    res.status(201).json(product.toJSON());
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// @desc    Update product
+// @desc    Update a product
 // @route   PUT /api/products/:id
 // @access  Public
 const updateProduct = async (req, res) => {
   try {
-    const { name, description, price, category, inStock } = req.body;
-
+    const { name, category, specifications, preferredSuppliers, typicalMargin, inStock } = req.body;
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price !== undefined ? price : product.price;
-    product.category = category || product.category;
+    product.name = name !== undefined ? name : product.name;
+    product.category = category !== undefined ? category : product.category;
+    product.specifications = specifications !== undefined ? specifications : product.specifications;
+    product.preferredSuppliers = preferredSuppliers !== undefined ? preferredSuppliers : product.preferredSuppliers;
+    product.typicalMargin = typicalMargin !== undefined ? typicalMargin : product.typicalMargin;
     product.inStock = inStock !== undefined ? inStock : product.inStock;
 
-    const updatedProduct = await product.save();
-    res.json(updatedProduct);
+    const updated = await product.save();
+    res.json(updated.toJSON());
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// @desc    Delete product
+// @desc    Delete a product
 // @route   DELETE /api/products/:id
 // @access  Public
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
+    if (!product) return res.status(404).json({ message: 'Product not found' });
     await product.deleteOne();
-    res.json({ message: 'Product removed' });
+    res.json({ message: 'Product removed', id: product.id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

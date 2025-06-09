@@ -1,28 +1,18 @@
+require('dotenv').config();
 const express = require('express');
-const cors    = require('cors');
-const connectDB = require('./config/db');
-
-connectDB();
+const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
+  origin: 'http://localhost:3000',
   credentials: true
 }));
-
-// Middleware
 app.use(express.json());
 
-// Routes
-app.use('/api/clients',  require('./routes/clientRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/quotes',   require('./routes/quoteRoutes'));
-app.use('/api/dashboard', require('./routes/dashboardRoutes'));  // <-- aqui
+app.use('/api/auth', authRoutes);
 
-// Basic route
 app.get('/', (req, res) => {
   res.send('API is running');
 });

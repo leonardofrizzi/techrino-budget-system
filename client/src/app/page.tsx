@@ -1,65 +1,107 @@
-import Link from "next/link";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const router = useRouter();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showModal && countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (showModal && countdown === 0) {
+      router.push('/dashboard');
+    }
+    return () => clearTimeout(timer);
+  }, [showModal, countdown, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+      const body: { email: string; password: string; name?: string } = { email, password };
+      if (mode === 'signup') body.name = name;
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Request failed');
+
+      localStorage.setItem('token', data.token);
+
+      if (mode === 'login') {
+        router.push('/dashboard');
+      } else {
+        setShowModal(true);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      setLoading(false);
+    }
+  };
+
+  const goNow = () => router.push('/dashboard');
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4">
       <div className="w-full max-w-md">
-        {/* Logo and company name */}
-        <div className="text-center mb-8">
-          <div className="inline-block p-4 rounded-full bg-blue-500/10 mb-4">
-            <svg 
-              className="w-16 h-16 text-blue-500" 
-              fill="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight">
-            <span className="text-blue-400">Tech</span>rino
-          </h1>
-          <p className="text-slate-400 mt-2 text-lg">Quote Management System</p>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold"><span className="text-blue-400">Tech</span>rino</h1>
+          <p className="text-slate-400 mt-2">Quote Management System</p>
         </div>
-
-        {/* Card */}
-        <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-xl p-8 shadow-2xl">
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-white">Welcome to your workspace</h2>
-              <p className="text-slate-300 mt-1">Streamline your business operations</p>
-            </div>
-            
-            {/* Features summary */}
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <Feature icon="📊" title="Real-time Analytics" />
-              <Feature icon="💼" title="Client Management" />
-              <Feature icon="📝" title="Quote Builder" />
-              <Feature icon="💰" title="Revenue Tracking" />
-            </div>
-            
-            {/* Action button */}
-            <Link 
-              href="/dashboard" 
-              className="block w-full bg-blue-600 hover:bg-blue-500 text-white py-3 px-6 rounded-lg text-center font-medium shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
-            >
-              Access Dashboard
-            </Link>
+        <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-xl p-8 shadow-2xl relative">
+          <div className="flex justify-around mb-6">
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setError(''); }}
+              className={`px-4 py-2 font-medium ${mode === 'login' ? 'text-white border-b-2 border-blue-400' : 'text-slate-400'}`}
+            >Login</button>
+            <button
+              type="button"
+              onClick={() => { setMode('signup'); setError(''); }}
+              className={`px-4 py-2 font-medium ${mode === 'signup' ? 'text-white border-b-2 border-blue-400' : 'text-slate-400'}`}
+            >Sign Up</button>
           </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === 'signup' && (
+              <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} required className="w-full p-3 rounded bg-white/20 placeholder-slate-300" disabled={loading}/>
+            )}
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full p-3 rounded bg-white/20 placeholder-slate-300" disabled={loading}/>
+            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full p-3 rounded bg-white/20 placeholder-slate-300" disabled={loading}/>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-medium flex items-center justify-center">
+              {loading && <Loader2 className="animate-spin mr-2" size={20}/>} {mode === 'login' ? 'Login' : 'Create Account'}
+            </button>
+          </form>
         </div>
-        
-        <p className="text-center mt-8 text-slate-400 text-sm">
-          © 2025 Techrino. All rights reserved.
-        </p>
+        <p className="text-center mt-6 text-slate-400 text-sm">&copy; 2025 Techrino. All rights reserved.</p>
       </div>
-    </div>
-  );
-}
 
-function Feature({ icon, title }: { icon: string; title: string }) {
-  return (
-    <div className="flex items-center space-x-3">
-      <span className="text-xl">{icon}</span>
-      <span className="text-sm text-slate-200">{title}</span>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg text-center text-slate-800 max-w-sm mx-4">
+            <p className="text-lg mb-4">Obrigado por se cadastrar!</p>
+            <p className="mb-4">Você será redirecionado ao dashboard em {countdown} segundos.</p>
+            <button onClick={goNow} className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg">Ir para Dashboard</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
